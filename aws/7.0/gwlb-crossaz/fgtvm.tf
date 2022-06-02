@@ -108,7 +108,7 @@ resource "aws_instance" "fgtvm" {
   instance_type     = var.size
   availability_zone = var.az1
   key_name          = var.keyname
-  user_data         = data.template_file.FortiGate.rendered
+  # user_data         = data.template_file.FortiGate.rendered
 
   root_block_device {
     volume_type = "standard"
@@ -174,7 +174,7 @@ data "template_file" "FortiGate" {
   template = file("${var.bootstrap-fgtvm}")
   vars = {
     type         = "${var.license_type}"
-    license_file = "${var.license}"
+    license_token = "${var.license}"
     adminsport   = "${var.adminsport}"
     dst          = var.privatecidraz2
     gateway      = cidrhost(var.privatecidraz1, 1)
@@ -187,7 +187,7 @@ data "template_file" "FortiGate2" {
   template = file("${var.bootstrap-fgtvm}")
   vars = {
     type         = "${var.license_type}"
-    license_file = "${var.license2}"
+    license_token = "${var.license2}"
     adminsport   = "${var.adminsport}"
     dst          = var.privatecidraz1
     gateway      = cidrhost(var.privatecidraz2, 1)
