@@ -146,14 +146,14 @@ variable "bootstrap-fgtvm" {
 
 // license file for the fgt
 variable "license" {
-  // Change to your own byol license file, license.lic
+  // Change to your flexvm token 1
   type    = string
-  default = "license.lic"
+  default = "flexvm"
 }
 
 // license file for the fgt
 variable "license2" {
-  // Change to your own byol license file, license.lic
+  // Change to your flexvm token 2
   type    = string
-  default = "license2.lic"
+  default = "flexvm2"
 }
