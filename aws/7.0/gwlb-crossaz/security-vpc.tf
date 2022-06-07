@@ -1,3 +1,51 @@
+// AWS VPC - Security 
+resource "aws_vpc" "fgtvm-vpc" {
+  cidr_block           = var.vpccidr
+  enable_dns_support   = true
+  enable_dns_hostnames = true
+  enable_classiclink   = false
+  instance_tenancy     = "default"
+  tags = {
+    Name = "terraform fgt demo"
+  }
+}
+
+resource "aws_subnet" "publicsubnetaz1" {
+  vpc_id            = aws_vpc.fgtvm-vpc.id
+  cidr_block        = var.publiccidraz1
+  availability_zone = var.az1
+  tags = {
+    Name = "public subnet az1"
+  }
+}
+
+resource "aws_subnet" "privatesubnetaz1" {
+  vpc_id            = aws_vpc.fgtvm-vpc.id
+  cidr_block        = var.privatecidraz1
+  availability_zone = var.az1
+  tags = {
+    Name = "private subnet az1"
+  }
+}
+
+resource "aws_subnet" "publicsubnetaz2" {
+  vpc_id            = aws_vpc.fgtvm-vpc.id
+  cidr_block        = var.publiccidraz2
+  availability_zone = var.az2
+  tags = {
+    Name = "public subnet az2"
+  }
+}
+
+resource "aws_subnet" "privatesubnetaz2" {
+  vpc_id            = aws_vpc.fgtvm-vpc.id
+  cidr_block        = var.privatecidraz2
+  availability_zone = var.az2
+  tags = {
+    Name = "private subnet az2"
+  }
+}
+
 // Creating Internet Gateway
 resource "aws_internet_gateway" "fgtvmigw" {
   vpc_id = aws_vpc.fgtvm-vpc.id
@@ -6,12 +54,6 @@ resource "aws_internet_gateway" "fgtvmigw" {
   }
 }
 
-resource "aws_internet_gateway" "csigw" {
-  vpc_id = aws_vpc.customer-vpc.id
-  tags = {
-    Name = "cs-igw"
-  }
-}
 
 // Route Table
 resource "aws_route_table" "fgtvmpublicrt" {
@@ -39,39 +81,6 @@ resource "aws_route_table" "fgtvmprivatert2" {
   }
 }
 
-resource "aws_route_table" "cspublicrt" {
-  vpc_id = aws_vpc.customer-vpc.id
-
-  tags = {
-    Name = "cs-public-edge-rt"
-  }
-}
-
-resource "aws_route_table" "cspublicrt2" {
-  vpc_id = aws_vpc.customer-vpc.id
-
-  tags = {
-    Name = "cs-public-egress-rt"
-  }
-}
-
-resource "aws_route_table" "csprivatert" {
-  depends_on = [aws_vpc_endpoint.gwlbendpoint]
-  vpc_id     = aws_vpc.customer-vpc.id
-
-  tags = {
-    Name = "cs-private-rt"
-  }
-}
-
-resource "aws_route_table" "csprivatert2" {
-  depends_on = [aws_vpc_endpoint.gwlbendpoint2]
-  vpc_id     = aws_vpc.customer-vpc.id
-
-  tags = {
-    Name = "cs-private-rt2"
-  }
-}
 resource "aws_route" "externalroute" {
   route_table_id         = aws_route_table.fgtvmpublicrt.id
   destination_cidr_block = "0.0.0.0/0"
@@ -85,50 +94,6 @@ resource "aws_route" "internalroute" {
   network_interface_id   = aws_network_interface.eth1.id
 }
 
-resource "aws_route" "internalroute2" {
-  depends_on             = [aws_instance.fgtvm]
-  route_table_id         = aws_route_table.fgtvmprivatert2.id
-  destination_cidr_block = "0.0.0.0/0"
-  network_interface_id   = aws_network_interface.eth1-1.id
-}
-
-
-
-resource "aws_route" "cspublicrouteaz1" {
-  depends_on             = [aws_route_table.cspublicrt]
-  route_table_id         = aws_route_table.cspublicrt.id
-  destination_cidr_block = var.csprivatecidraz1
-  vpc_endpoint_id        = aws_vpc_endpoint.gwlbendpoint.id
-}
-
-resource "aws_route" "cspublicrouteaz2" {
-  depends_on             = [aws_route_table.cspublicrt]
-  route_table_id         = aws_route_table.cspublicrt.id
-  destination_cidr_block = var.csprivatecidraz2
-  vpc_endpoint_id        = aws_vpc_endpoint.gwlbendpoint2.id
-}
-
-resource "aws_route" "csinternalroute" {
-  depends_on             = [aws_route_table.csprivatert]
-  route_table_id         = aws_route_table.csprivatert.id
-  destination_cidr_block = "0.0.0.0/0"
-  vpc_endpoint_id        = aws_vpc_endpoint.gwlbendpoint.id
-}
-
-resource "aws_route" "csinternalroute2" {
-  depends_on             = [aws_route_table.csprivatert2]
-  route_table_id         = aws_route_table.csprivatert2.id
-  destination_cidr_block = "0.0.0.0/0"
-  vpc_endpoint_id        = aws_vpc_endpoint.gwlbendpoint2.id
-}
-
-resource "aws_route" "csexternalroute" {
-  depends_on             = [aws_route_table.cspublicrt2]
-  route_table_id         = aws_route_table.cspublicrt2.id
-  destination_cidr_block = "0.0.0.0/0"
-  gateway_id             = aws_internet_gateway.csigw.id
-}
-
 resource "aws_route_table_association" "public1associate" {
   subnet_id      = aws_subnet.publicsubnetaz1.id
   route_table_id = aws_route_table.fgtvmpublicrt.id
@@ -138,8 +103,6 @@ resource "aws_route_table_association" "public2associate" {
   subnet_id      = aws_subnet.publicsubnetaz2.id
   route_table_id = aws_route_table.fgtvmpublicrt.id
 }
-
-
 
 resource "aws_route_table_association" "internalassociate" {
   subnet_id      = aws_subnet.privatesubnetaz1.id
@@ -151,30 +114,13 @@ resource "aws_route_table_association" "internal2associate" {
   route_table_id = aws_route_table.fgtvmprivatert2.id
 }
 
-resource "aws_route_table_association" "cspublicassociate" {
-  route_table_id = aws_route_table.cspublicrt.id
-  gateway_id     = aws_internet_gateway.csigw.id
+resource "aws_route" "internalroute2" {
+  depends_on             = [aws_instance.fgtvm]
+  route_table_id         = aws_route_table.fgtvmprivatert2.id
+  destination_cidr_block = "0.0.0.0/0"
+  network_interface_id   = aws_network_interface.eth1-1.id
 }
 
-resource "aws_route_table_association" "csinternalassociateaz1" {
-  subnet_id      = aws_subnet.csprivatesubnetaz1.id
-  route_table_id = aws_route_table.csprivatert.id
-}
-
-resource "aws_route_table_association" "csinternalassociateaz2" {
-  subnet_id      = aws_subnet.csprivatesubnetaz2.id
-  route_table_id = aws_route_table.csprivatert2.id
-}
-
-resource "aws_route_table_association" "csexternalassociateaz1" {
-  subnet_id      = aws_subnet.cspublicsubnetaz1.id
-  route_table_id = aws_route_table.cspublicrt2.id
-}
-
-resource "aws_route_table_association" "csexternalassociateaz2" {
-  subnet_id      = aws_subnet.cspublicsubnetaz2.id
-  route_table_id = aws_route_table.cspublicrt2.id
-}
 
 resource "aws_eip" "FGTPublicIP" {
   depends_on        = [aws_instance.fgtvm]
@@ -255,6 +201,7 @@ resource "aws_security_group" "allow_all" {
   }
 }
 
+
 //  Gateway Load Balancer on FGT VPC to two FGTs
 resource "aws_lb" "gateway_lb" {
   name                             = "gatewaylb"
@@ -317,17 +264,3 @@ resource "aws_vpc_endpoint_service" "fgtgwlbservice" {
   gateway_load_balancer_arns = [aws_lb.gateway_lb.arn]
 }
 
-
-resource "aws_vpc_endpoint" "gwlbendpoint" {
-  service_name      = aws_vpc_endpoint_service.fgtgwlbservice.service_name
-  subnet_ids        = [aws_subnet.cspublicsubnetaz1.id]
-  vpc_endpoint_type = aws_vpc_endpoint_service.fgtgwlbservice.service_type
-  vpc_id            = aws_vpc.customer-vpc.id
-}
-
-resource "aws_vpc_endpoint" "gwlbendpoint2" {
-  service_name      = aws_vpc_endpoint_service.fgtgwlbservice.service_name
-  subnet_ids        = [aws_subnet.cspublicsubnetaz2.id]
-  vpc_endpoint_type = aws_vpc_endpoint_service.fgtgwlbservice.service_type
-  vpc_id            = aws_vpc.customer-vpc.id
-}
