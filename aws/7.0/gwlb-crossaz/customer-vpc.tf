@@ -165,8 +165,15 @@ resource "aws_vpc_endpoint" "gwlbendpoint2" {
   vpc_id            = aws_vpc.customer-vpc.id
 }
 
-// Simple website
+// Add grace period for FortiGate instance to start
+resource "time_sleep" "wait_2_mins" {
+  depends_on = [aws_instance.fgtvm2]
+  create_duration = "2m"
+}
+
+// Wait 2 mins before creating Simple website
 resource "aws_instance" "web" {
+  depends_on = [time_sleep.wait_2_mins]
   ami             = "${data.aws_ami.amazon-linux-2.id}"
   instance_type   = "t3.micro"
   key_name        = var.keyname
