@@ -171,7 +171,7 @@ resource "aws_instance" "web" {
   instance_type   = "t3.micro"
   key_name        = var.keyname
   subnet_id       = aws_subnet.csprivatesubnetaz1.id
-  security_groups = aws_security_group.sg.id
+  security_groups = [aws_security_group.sg.id]
 
   user_data     = <<-EOF
                   #!/bin/bash
@@ -213,6 +213,15 @@ resource "aws_security_group" "sg" {
     ipv6_cidr_blocks = ["::/0"]
   }
 
+  ingress {
+    description      = "ICMP from VPC"
+    from_port        = 8
+    to_port          = 0
+    protocol         = "icmp"
+    cidr_blocks      = ["0.0.0.0/0"]
+    ipv6_cidr_blocks = ["::/0"]
+  }
+  
   egress {
     from_port        = 0
     to_port          = 0
@@ -227,17 +236,11 @@ resource "aws_security_group" "sg" {
 }
 
 data "aws_ami" "amazon-linux-2" {
- most_recent = true
-
-
- filter {
-   name   = "owner-alias"
-   values = ["amazon"]
- }
-
-
- filter {
-   name   = "name"
-   values = ["amzn2-ami-hvm*"]
- }
+  most_recent = true
+  owners = ["amazon"]
+  
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm*"]
+  }
 }
