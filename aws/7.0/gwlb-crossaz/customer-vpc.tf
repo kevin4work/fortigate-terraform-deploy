@@ -172,7 +172,8 @@ resource "aws_instance" "web" {
   key_name        = var.keyname
   subnet_id       = aws_subnet.csprivatesubnetaz1.id
   security_groups = [aws_security_group.sg.id]
-
+  associate_public_ip_address = true
+  
   user_data     = <<-EOF
                   #!/bin/bash
                   sudo su
