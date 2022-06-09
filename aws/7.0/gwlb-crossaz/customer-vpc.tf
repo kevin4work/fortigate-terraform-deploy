@@ -173,7 +173,7 @@ resource "aws_instance" "web" {
   subnet_id       = aws_subnet.csprivatesubnetaz1.id
   security_groups = [aws_security_group.sg.id]
   associate_public_ip_address = true
-  
+
   user_data     = <<-EOF
                   #!/bin/bash
                   sudo su
@@ -216,8 +216,8 @@ resource "aws_security_group" "sg" {
 
   ingress {
     description      = "ICMP from VPC"
-    from_port        = 8
-    to_port          = 0
+    from_port        = -1
+    to_port          = -1
     protocol         = "icmp"
     cidr_blocks      = ["0.0.0.0/0"]
     ipv6_cidr_blocks = ["::/0"]
