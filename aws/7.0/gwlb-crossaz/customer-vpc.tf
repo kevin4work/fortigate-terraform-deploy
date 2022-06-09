@@ -167,7 +167,7 @@ resource "aws_vpc_endpoint" "gwlbendpoint2" {
 
 // Add grace period for FortiGate instance to start
 resource "time_sleep" "wait_2_mins" {
-  depends_on = [aws_instance.fgtvm2]
+  depends_on = [aws_instance.fgtvm, aws_instance.fgtvm2]
   create_duration = "2m"
 }
 
