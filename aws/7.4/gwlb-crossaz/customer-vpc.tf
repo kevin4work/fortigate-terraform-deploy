@@ -3,7 +3,6 @@ resource "aws_vpc" "customer-vpc" {
   cidr_block           = var.csvpccidr
   enable_dns_support   = true
   enable_dns_hostnames = true
-  enable_classiclink   = false
   instance_tenancy     = "default"
   tags = {
     Name = "terraform customer demo"

@@ -3,7 +3,6 @@ resource "aws_vpc" "fgtvm-vpc" {
   cidr_block           = var.vpccidr
   enable_dns_support   = true
   enable_dns_hostnames = true
-  enable_classiclink   = false
   instance_tenancy     = "default"
   tags = {
     Name = "terraform fgt demo"
@@ -124,13 +123,13 @@ resource "aws_route" "internalroute2" {
 
 resource "aws_eip" "FGTPublicIP" {
   depends_on        = [aws_instance.fgtvm]
-  vpc               = true
+  domain            = "vpc"
   network_interface = aws_network_interface.eth0.id
 }
 
 resource "aws_eip" "FGTPublicIP2" {
   depends_on        = [aws_instance.fgtvm2]
-  vpc               = true
+  domain            = "vpc"
   network_interface = aws_network_interface.eth0-1.id
 }
 
