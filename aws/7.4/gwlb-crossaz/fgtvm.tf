@@ -174,7 +174,6 @@ data "template_file" "FortiGate" {
   template = file("${var.bootstrap-fgtvm}")
   vars = {
     type         = "${var.license_type}"
-    license_token = "${var.license}"
     adminsport   = "${var.adminsport}"
     dst          = var.privatecidraz2
     gateway      = cidrhost(var.privatecidraz1, 1)
@@ -187,7 +186,6 @@ data "template_file" "FortiGate2" {
   template = file("${var.bootstrap-fgtvm}")
   vars = {
     type         = "${var.license_type}"
-    license_token = "${var.license2}"
     adminsport   = "${var.adminsport}"
     dst          = var.privatecidraz1
     gateway      = cidrhost(var.privatecidraz2, 1)

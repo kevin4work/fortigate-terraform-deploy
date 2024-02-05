@@ -382,17 +382,3 @@ variable "bootstrap-fgtvm" {
   type    = string
   default = "fgtvm.conf"
 }
-
-// license token for the fgt
-variable "license" {
-  // Change to your own token 2
-  type    = string
-  default = "xxx"
-}
-
-// license token for the fgt
-variable "license2" {
-  // Change to your own token 2
-  type    = string
-  default = "xxx"
-}
