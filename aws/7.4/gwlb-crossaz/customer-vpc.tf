@@ -164,29 +164,15 @@ resource "aws_vpc_endpoint" "gwlbendpoint2" {
   vpc_id            = aws_vpc.customer-vpc.id
 }
 
-// Add grace period for FortiGate instance to start
-resource "time_sleep" "wait_5_mins" {
-  depends_on = [aws_instance.fgtvm, aws_instance.fgtvm2]
-  create_duration = "5m"
-}
 
 // Wait 5 mins before creating Simple website
 resource "aws_instance" "web" {
-  depends_on = [time_sleep.wait_5_mins]
   ami             = "${data.aws_ami.amazon-linux-2.id}"
   instance_type   = "t3.micro"
   key_name        = var.keyname
   subnet_id       = aws_subnet.csprivatesubnetaz1.id
   security_groups = [aws_security_group.sg.id]
   associate_public_ip_address = true
-
-  user_data     = <<-EOF
-                  #!/bin/bash
-                  sudo su
-                  yum -y install httpd
-                  sudo systemctl enable httpd
-                  sudo systemctl start httpd
-                  EOF
 
   tags = {
     Name = "simple web"
